@@ -7,3 +7,13 @@
     flex-direction: column;
     margin: auto;
 }
+.candidate {
+    background-color: turquoise;
+    cursor: pointer;
+}
+.normal {
+    background-color: pink;
+}
+.zero {
+    background-color: lightgray;
+}

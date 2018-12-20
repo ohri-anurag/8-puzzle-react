@@ -4,8 +4,8 @@ import './Square.css';
 function Square(props) {
   return (
     <div 
-      className="square"
-      onClick={props.onClick}
+      className={"square " + props.className}
+      onClick={() => props.onClick(props.id)}
     >
       <span className="squareText">{props.value}</span>
     </div>

@@ -1,0 +1,45 @@
+.Intro {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+}
+.introTitle {
+    padding: 0 20px;
+    font-size: 128px;
+    transition: color 500ms;
+    transition: background-color 500ms;
+}
+.introTitle:hover {
+    cursor: pointer;
+    background-color: black;
+    color: lavender;
+}
+.imageDiv {
+    display: flex;
+}
+img {
+    display: flex;
+    margin: auto;
+}
+.text {
+    display: flex;
+    margin: auto;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    font-size: 18px;
+}
+.next {
+    font-size: 32px;
+    display: flex;
+    margin: auto;
+    text-align: center;
+    background-color: lavender;
+    transition: color 500ms;
+    transition: background-color 500ms;
+    padding: 5px 20px;
+}
+.next:hover {
+    cursor: pointer;
+    background-color: black;
+    color: lavender;
+}

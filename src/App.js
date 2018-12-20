@@ -1,8 +1,20 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import Board from './Board';
+import Intro from './Intro';
 import swap from './Util'
+
+let neighbours = [
+  [1, 3],
+  [0, 2, 4],
+  [1, 5],
+  [0, 4, 6],
+  [1, 3, 5, 7],
+  [2, 4, 8],
+  [3, 7],
+  [4, 6, 8],
+  [5, 7]
+];
 
 class App extends Component {
   constructor(props) {
@@ -10,11 +22,14 @@ class App extends Component {
     let nums = randomize();
     this.state = {
       nums: nums,
+      history: [],
       zero: nums.indexOf(0),
       moves: 0,
-      isDone: false
+      isDone: false,
+      intro: true
     };
   }
+
 
   // Check to see if the clicked element is a neighbour of zero
   handleClick(pos) {
@@ -22,24 +37,17 @@ class App extends Component {
     if (this.state.isDone)
       return;
 
-    // Calculate the row and col for clicked element
-    let row = Math.floor(pos/3), col = pos%3;
-  
-    // Also, calculate the row and col for zero element
-    let rz = Math.floor(this.state.zero/3), cz = this.state.zero%3;
-
-    // Neighbours either have the same row, or the same col
-    if ((row === rz && (col === cz+1 || col === cz-1)) ||
-        (col === cz && (row === rz+1 || row === rz-1))
-    ) {
+    // Check to see if the neighbours of zero contain pos
+    if (neighbours[this.state.zero].indexOf(pos) > -1) {
       // Swap the contents of these two cells
       let nums = this.state.nums.slice();
       swap(nums, this.state.zero, pos);
-      this.setState({
+      this.setState((state, props) => ({
+        history: state.history.concat([state.nums]),
         nums: nums,
         zero: pos,
-        moves: this.state.moves + 1
-      });
+        moves: state.moves + 1
+      }));
 
       // Check if puzzle is done
       let i;
@@ -57,32 +65,80 @@ class App extends Component {
     }
   }
 
+  finishIntro() {
+    this.setState({
+      intro: false
+    });
+  }
+
+  newGame() {
+    let nums = randomize();
+    this.setState({
+      nums: nums,
+      zero: nums.indexOf(0),
+      moves: 0,
+      isDone: false
+    });
+  }
+
+  undo() {
+    // Check if any moves have been made, or if user has already won
+    if (!this.state.history.length || this.state.isDone)
+      return;
+
+    let lastState = this.state.history[this.state.history.length - 1];
+    this.setState((state, props) => ({
+      nums: lastState,
+      history: state.history.slice(0, state.history.length - 1),
+      zero: lastState.indexOf(0),
+      moves: state.moves - 1
+    }));
+  }
+
+  reset() {
+    // Check if any moves have been made
+    if (!this.state.history.length)
+      return;
+
+    let firstState = this.state.history[0];
+    this.setState((state, props) => ({
+      nums: firstState,
+      history: [],
+      zero: firstState.indexOf(0),
+      moves: 0,
+      isDone: false
+    }));
+  }
+
   render() {
-    return (
-      // <div className="App">
-      //   <header className="App-header">
-      //     <img src={logo} className="App-logo" alt="logo" />
-      //     <p>
-      //       Edit <code>src/App.js</code> and save to reload.
-      //     </p>
-      //     <a
-      //       className="App-link"
-      //       href="https://reactjs.org"
-      //       target="_blank"
-      //       rel="noopener noreferrer"
-      //     >
-      //       Learn React
-      //     </a>
-      //   </header>
-      // </div>
-      <div className="App">
-        <Board
-          nums={this.state.nums}
-          onClick={this.handleClick.bind(this)}
-        />
-        <div className="moves">{(this.state.isDone ? "You Won! " : "") + "Moves: " + this.state.moves}</div>
-      </div>
-    );
+    let appContents;
+    if (this.state.intro) {
+      // Show the intro section
+      appContents = (
+        <div className="App">
+          <Intro finish={this.finishIntro.bind(this)} />
+        </div>
+      );
+    } else {
+      appContents = (
+        <div className="App">
+          <div className='boardAndButtons'>
+            <div className='next' onClick={this.newGame.bind(this)}>{'New Puzzle'}</div>
+            <Board
+              nums={this.state.nums}
+              onClick={this.handleClick.bind(this)}
+              candidates={this.state.isDone ? [] : neighbours[this.state.zero]}
+            />
+            <div className='undoReset'>
+              <div className='next' onClick={this.undo.bind(this)}>{'Undo'}</div>
+              <div className='next' onClick={this.reset.bind(this)}>{'Reset'}</div>
+            </div>
+          </div>
+          <div className="moves">{(this.state.isDone ? "You Won! " : "") + "Moves: " + this.state.moves}</div>
+        </div>
+      );
+    }
+    return appContents;
   }
 }
 
@@ -117,12 +173,6 @@ function randomize() {
   }
 
   return nums;
-}
-
-function displacement(i, j) {
-  let ri = Math.floor(i/3), ci = i%3;
-  let rj = Math.floor(j/3), cj = j%3;
-  return Math.abs(ri - rj) + Math.abs(ci - cj);
 }
 
 export default App;
